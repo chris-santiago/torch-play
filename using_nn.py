@@ -11,19 +11,18 @@ MNIST = load_data().clean(binarize=False)
 class MnistLogistic(nn.Module):
     def __init__(self):
         super().__init__()
-        self.weights = nn.Parameter(torch.randn(784, 10) / math.sqrt(784))
-        self.bias = nn.Parameter(torch.zeros(10))
+        self.lin = nn.Linear(784, 10)
         self.loss_func = nn.CrossEntropyLoss()
 
     def forward(self, xb):
-        return xb.double() @ self.weights.double() + self.bias
+        return self.lin(xb.float())
 
 
 class MnistTrainer:
     def __init__(self, model, epochs, lr):
         self.model = model
         self.epochs = epochs
-        self.lr = lr
+        self.optim = torch.optim.SGD(self.model.parameters(), lr=lr)
 
     def fit(self, x_train, y_train, bs):
         for epoch in range(self.epochs):
@@ -35,10 +34,8 @@ class MnistTrainer:
                 pred = self.model.forward(xb)
                 loss = self.model.loss_func(pred, yb)
                 loss.backward()
-                with torch.no_grad():
-                    for param in self.model.parameters():
-                        param -= param.grad * self.lr
-                    self.model.zero_grad()
+                self.optim.step()
+                self.optim.zero_grad()
 
     def predict(self, x_valid):
         return self.model.forward(x_valid)
