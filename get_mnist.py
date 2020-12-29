@@ -3,7 +3,7 @@ import idx2numpy
 import pathlib
 import urllib.request
 
-from datasets import Mnist
+from datasets import Dataset, Mnist
 
 HERE = pathlib.Path().cwd()
 DATA = HERE.joinpath('data')
@@ -29,9 +29,10 @@ def load_data():
         filename = [*DATA.glob(key)][0]
         with gzip.open(filename, 'rb') as file:
             data[key] = idx2numpy.convert_from_file(file)
-    return Mnist(
+    mnist_data = Dataset(
         data['*train-images*'], data['*train-labels*'], data['*t10k-images*'], data['*t10k-labels*']
     )
+    return Mnist(mnist_data)
 
 
 if __name__ == '__main__':
