@@ -1,11 +1,13 @@
-import math
-
 import torch
 import torch.nn as nn
+from torch.utils.data import TensorDataset, DataLoader
 
 from get_mnist import load_data
 
 MNIST = load_data().clean(binarize=False)
+x_train, y_train, x_valid, y_valid = map(torch.tensor, tuple(MNIST))
+train_ds = TensorDataset(x_train, y_train)
+train_dl = DataLoader(train_ds, batch_size=256)
 
 
 class MnistLogistic(nn.Module):
@@ -25,12 +27,10 @@ class MnistTrainer:
         self.optim = torch.optim.SGD(self.model.parameters(), lr=lr)
 
     def fit(self, x_train, y_train, bs):
+        dataset = TensorDataset(x_train, y_train)
+        dataloader = DataLoader(dataset, batch_size=bs)
         for epoch in range(self.epochs):
-            for i in range((x_train.shape[0] - 1) // bs + 1):
-                start_i = i * bs
-                end_i = start_i + bs
-                xb = x_train[start_i:end_i]
-                yb = y_train[start_i:end_i]
+            for xb, yb in dataloader:
                 pred = self.model.forward(xb)
                 loss = self.model.loss_func(pred, yb)
                 loss.backward()
@@ -46,7 +46,6 @@ def accuracy(preds, actual):
 
 
 def main():
-    x_train, y_train, x_valid, y_valid = map(torch.tensor, tuple(MNIST))
     model = MnistLogistic()
     learner = MnistTrainer(model, epochs=20, lr=0.1)
     learner.fit(x_train, y_train.long(), 256)
