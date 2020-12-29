@@ -5,9 +5,6 @@ from torch.utils.data import TensorDataset, DataLoader
 from get_mnist import load_data
 
 MNIST = load_data().clean(binarize=False)
-x_train, y_train, x_valid, y_valid = map(torch.tensor, tuple(MNIST))
-train_ds = TensorDataset(x_train, y_train)
-train_dl = DataLoader(train_ds, batch_size=256)
 
 
 class MnistLogistic(nn.Module):
@@ -46,6 +43,7 @@ def accuracy(preds, actual):
 
 
 def main():
+    x_train, y_train, x_valid, y_valid = map(torch.tensor, tuple(MNIST))
     model = MnistLogistic()
     learner = MnistTrainer(model, epochs=20, lr=0.1)
     learner.fit(x_train, y_train.long(), 256)
