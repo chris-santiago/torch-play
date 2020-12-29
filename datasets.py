@@ -18,12 +18,18 @@ class Mnist:
     def __init__(self, dataset: Dataset):
         self.data = dataset
 
-    def clean(self):
-        lb = LabelBinarizer()
-        clean = Dataset(
+    def clean(self, binarize=True):
+        if binarize:
+            lb = LabelBinarizer()
+            return Dataset(
+                self.data.train_x.reshape(-1, 784) / 255.,
+                lb.fit_transform(self.data.train_y),
+                self.data.valid_x.reshape(-1, 784) / 255.,
+                lb.transform(self.data.valid_y)
+            )
+        return Dataset(
             self.data.train_x.reshape(-1, 784) / 255.,
-            lb.fit_transform(self.data.train_y),
+            self.data.train_y,
             self.data.valid_x.reshape(-1, 784) / 255.,
-            lb.transform(self.data.valid_y)
+            self.data.valid_y
         )
-        return clean
