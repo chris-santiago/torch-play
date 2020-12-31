@@ -1,3 +1,5 @@
+import tqdm
+
 import torch
 import torch.nn as nn
 from torch.utils.data import TensorDataset, DataLoader
@@ -11,7 +13,7 @@ class MnistLogistic(nn.Module):
     def __init__(self):
         super().__init__()
         self.lin = nn.Linear(784, 10)
-        self.loss_func = nn.CrossEntropyLoss()
+        self.loss_func = nn.CrossEntropyLoss()  # includes log softmax activation
 
     def forward(self, xb):
         return self.lin(xb.float())
@@ -26,7 +28,7 @@ class MnistTrainer:
     def fit(self, x_train, y_train, bs):
         dataset = TensorDataset(x_train, y_train)
         dataloader = DataLoader(dataset, batch_size=bs)
-        for epoch in range(self.epochs):
+        for epoch in tqdm.tqdm(range(self.epochs)):
             for xb, yb in dataloader:
                 pred = self.model.forward(xb)
                 loss = self.model.loss_func(pred, yb)
