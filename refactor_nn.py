@@ -49,16 +49,20 @@ class MnistTrainer:
             self.optim.zero_grad()
         return loss.item(), len(xb)
 
+    @staticmethod
+    def get_total_loss(losses, nums):
+        return np.sum(np.multiply(losses, nums)) / np.sum(nums)
+
     def fit(self, data, bs):
         train_dl, valid_dl = make_dataloaders(data, bs)
         for epoch in range(self.epochs):
             self.model.train()
             losses, nums = zip(*[self.loss_batch(xb, yb, optim=self.optim) for xb, yb in train_dl])
-            train_loss = np.sum(np.multiply(losses, nums)) / np.sum(nums)
+            train_loss = self.get_total_loss(losses, nums)
             self.model.eval()
             with torch.no_grad():
                 losses, nums = zip(*[self.loss_batch(xb, yb) for xb, yb in valid_dl])
-                val_loss = np.sum(np.multiply(losses, nums)) / np.sum(nums)
+                val_loss = self.get_total_loss(losses, nums)
             print(f'Epoch: {epoch}. Training Loss: {train_loss}. Validation Loss: {val_loss}')
 
     def predict(self, x_valid):
