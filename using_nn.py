@@ -37,7 +37,9 @@ class MnistTrainer:
                 self.optim.zero_grad()
 
     def predict(self, x_valid):
-        return self.model.forward(x_valid)
+        with torch.no_grad():
+            self.model.eval()
+            return self.model.forward(x_valid)
 
 
 def accuracy(preds, actual):
